@@ -29,13 +29,6 @@ export default function Login() {
             Google로 로그인
           </button>
 
-          <button onClick={signInWithKakao}
-            className="w-full flex items-center justify-center gap-3 bg-[#FEE500] rounded-xl px-4 py-3 text-sm font-medium text-[#191919] hover:bg-[#FDD800] transition-colors">
-            <svg width="20" height="20" viewBox="0 0 24 24">
-              <path fill="#191919" d="M12 3C6.48 3 2 6.36 2 10.5c0 2.67 1.77 5.02 4.44 6.35-.14.52-.9 3.35-.93 3.56 0 0-.02.15.08.21.1.06.21.01.21.01.28-.04 3.24-2.12 3.75-2.48.79.12 1.61.18 2.45.18 5.52 0 10-3.36 10-7.5S17.52 3 12 3z"/>
-            </svg>
-            카카오로 로그인
-          </button>
         </div>
 
         <p className="mt-6 text-xs text-gray-400">
