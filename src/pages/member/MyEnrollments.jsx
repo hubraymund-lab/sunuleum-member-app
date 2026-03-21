@@ -32,7 +32,7 @@ export default function MyEnrollments() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">내 신청 목록</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">내 신청 목록</h2>
 
       {loading ? (
         <p className="text-gray-400">로딩 중...</p>
@@ -44,18 +44,20 @@ export default function MyEnrollments() {
       ) : (
         <div className="space-y-3">
           {enrollments.map(e => (
-            <div key={e.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-gray-900">{e.program?.title || '(삭제된 프로그램)'}</h3>
-                <div className="flex items-center gap-3 mt-1">
-                  <StatusBadge status={e.status} label={STATUS_LABELS[e.status]} />
-                  {e.child && <span className="text-sm text-gray-500">자녀: {e.child.name}</span>}
-                  <span className="text-sm text-gray-400">{new Date(e.enrolled_at).toLocaleDateString('ko-KR')}</span>
+            <div key={e.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h3 className="font-semibold text-gray-900">{e.program?.title || '(삭제된 프로그램)'}</h3>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
+                    <StatusBadge status={e.status} label={STATUS_LABELS[e.status]} />
+                    {e.child && <span className="text-sm text-gray-500">자녀: {e.child.name}</span>}
+                    <span className="text-sm text-gray-400">{new Date(e.enrolled_at).toLocaleDateString('ko-KR')}</span>
+                  </div>
                 </div>
+                {e.status === 'enrolled' && (
+                  <button onClick={() => handleCancel(e.id)} className="text-sm text-red-500 hover:underline self-start sm:self-center">취소</button>
+                )}
               </div>
-              {e.status === 'enrolled' && (
-                <button onClick={() => handleCancel(e.id)} className="text-sm text-red-500 hover:underline">취소</button>
-              )}
             </div>
           ))}
         </div>

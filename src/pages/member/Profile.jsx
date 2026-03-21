@@ -23,9 +23,9 @@ export default function Profile() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">내 프로필</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">내 프로필</h2>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-lg">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 max-w-lg">
         <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
           {profile?.avatar_url ? (
             <img src={profile.avatar_url} alt="" className="w-16 h-16 rounded-full" />

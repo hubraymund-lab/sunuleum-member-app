@@ -36,40 +36,40 @@ export default function MyFees() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">회비 내역</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">회비 내역</h2>
         <select value={year} onChange={e => setYear(parseInt(e.target.value))}
-          className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
           {years.map(y => <option key={y} value={y}>{y}년</option>)}
         </select>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center gap-4">
-          <div className="bg-green-100 p-3 rounded-lg"><CheckCircle size={24} className="text-green-600" /></div>
-          <div>
-            <p className="text-sm text-gray-500">납부 완료</p>
-            <p className="text-xl font-bold text-gray-900">{paidCount}개월</p>
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
+          <div className="bg-green-100 p-2 sm:p-3 rounded-lg"><CheckCircle size={20} className="text-green-600 sm:w-6 sm:h-6" /></div>
+          <div className="text-center sm:text-left">
+            <p className="text-xs sm:text-sm text-gray-500">납부</p>
+            <p className="text-lg sm:text-xl font-bold text-gray-900">{paidCount}<span className="text-sm font-normal">월</span></p>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center gap-4">
-          <div className="bg-red-100 p-3 rounded-lg"><AlertCircle size={24} className="text-red-600" /></div>
-          <div>
-            <p className="text-sm text-gray-500">미납</p>
-            <p className="text-xl font-bold text-gray-900">{unpaidCount}개월</p>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
+          <div className="bg-red-100 p-2 sm:p-3 rounded-lg"><AlertCircle size={20} className="text-red-600 sm:w-6 sm:h-6" /></div>
+          <div className="text-center sm:text-left">
+            <p className="text-xs sm:text-sm text-gray-500">미납</p>
+            <p className="text-lg sm:text-xl font-bold text-gray-900">{unpaidCount}<span className="text-sm font-normal">월</span></p>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center gap-4">
-          <div className="bg-indigo-100 p-3 rounded-lg"><Wallet size={24} className="text-indigo-600" /></div>
-          <div>
-            <p className="text-sm text-gray-500">총 납부액</p>
-            <p className="text-xl font-bold text-gray-900">{totalPaid.toLocaleString()}원</p>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
+          <div className="bg-indigo-100 p-2 sm:p-3 rounded-lg"><Wallet size={20} className="text-indigo-600 sm:w-6 sm:h-6" /></div>
+          <div className="text-center sm:text-left">
+            <p className="text-xs sm:text-sm text-gray-500">총액</p>
+            <p className="text-lg sm:text-xl font-bold text-gray-900">{totalPaid.toLocaleString()}<span className="text-sm font-normal">원</span></p>
           </div>
         </div>
       </div>
 
       {/* Monthly grid */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 mb-6">
         <h3 className="text-sm font-medium text-gray-500 mb-3">{year}년 납부 현황</h3>
         <div className="grid grid-cols-6 sm:grid-cols-12 gap-2">
           {Array.from({ length: 12 }, (_, i) => {
@@ -91,7 +91,7 @@ export default function MyFees() {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Detail list */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {loading ? (
           <p className="p-6 text-gray-400 text-center">로딩 중...</p>
@@ -101,28 +101,49 @@ export default function MyFees() {
             <p className="text-gray-500">{year}년 회비 기록이 없습니다</p>
           </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">월</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">금액</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">납부일</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">상태</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">월</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">금액</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">납부일</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">상태</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {fees.map(f => (
+                    <tr key={f.id}>
+                      <td className="px-6 py-4 font-medium text-gray-900">{f.month}</td>
+                      <td className="px-6 py-4 text-gray-600">{f.amount.toLocaleString()}원</td>
+                      <td className="px-6 py-4 text-gray-600">{f.paid_date || '-'}</td>
+                      <td className="px-6 py-4">
+                        <StatusBadge status={f.status} label={f.status === 'paid' ? '납부' : '미납'} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile card list */}
+            <div className="sm:hidden divide-y divide-gray-200">
               {fees.map(f => (
-                <tr key={f.id}>
-                  <td className="px-6 py-4 font-medium text-gray-900">{f.month}</td>
-                  <td className="px-6 py-4 text-gray-600">{f.amount.toLocaleString()}원</td>
-                  <td className="px-6 py-4 text-gray-600">{f.paid_date || '-'}</td>
-                  <td className="px-6 py-4">
-                    <StatusBadge status={f.status} label={f.status === 'paid' ? '납부' : '미납'} />
-                  </td>
-                </tr>
+                <div key={f.id} className="p-4 flex items-center justify-between">
+                  <div>
+                    <span className="text-sm font-medium text-gray-900">{f.month}</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm text-gray-500">{f.amount.toLocaleString()}원</span>
+                      {f.paid_date && <span className="text-xs text-gray-400">{f.paid_date}</span>}
+                    </div>
+                  </div>
+                  <StatusBadge status={f.status} label={f.status === 'paid' ? '납부' : '미납'} />
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
     </div>

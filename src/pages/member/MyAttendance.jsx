@@ -45,15 +45,15 @@ export default function MyAttendance() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">출석 내역</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">출석 내역</h2>
         <select value={year} onChange={e => setYear(parseInt(e.target.value))}
-          className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
           {years.map(y => <option key={y} value={y}>{y}년</option>)}
         </select>
       </div>
 
       {/* Yearly summary */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 mb-6">
         <h3 className="text-sm font-medium text-gray-500 mb-3">{year}년 월별 출석</h3>
         <div className="grid grid-cols-6 sm:grid-cols-12 gap-2">
           {Array.from({ length: 12 }, (_, i) => {
@@ -84,28 +84,48 @@ export default function MyAttendance() {
             <p className="text-gray-500">{year}년 출석 기록이 없습니다</p>
           </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">날짜</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">유형</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">메모</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">날짜</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">유형</th>
+                    <th className="text-left px-6 py-3 text-sm font-medium text-gray-500">메모</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {records.map(r => (
+                    <tr key={r.id}>
+                      <td className="px-6 py-4 text-gray-900">{r.date}</td>
+                      <td className="px-6 py-4">
+                        <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${TYPE_COLORS[r.type] || TYPE_COLORS['기타']}`}>
+                          {r.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-500 text-sm">{r.note || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile card list */}
+            <div className="sm:hidden divide-y divide-gray-200">
               {records.map(r => (
-                <tr key={r.id}>
-                  <td className="px-6 py-4 text-gray-900">{r.date}</td>
-                  <td className="px-6 py-4">
+                <div key={r.id} className="p-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-gray-900">{r.date}</span>
                     <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${TYPE_COLORS[r.type] || TYPE_COLORS['기타']}`}>
                       {r.type}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-500 text-sm">{r.note || '-'}</td>
-                </tr>
+                  </div>
+                  {r.note && <p className="text-sm text-gray-500">{r.note}</p>}
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
     </div>

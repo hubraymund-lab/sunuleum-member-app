@@ -69,7 +69,7 @@ export default function Programs() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">프로그램</h2>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">프로그램</h2>
 
       <div className="relative mb-6">
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -106,7 +106,7 @@ export default function Programs() {
 
                 {prog.description && <p className="text-sm text-gray-600 mb-3">{prog.description}</p>}
 
-                <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-gray-500 mb-4">
                   {prog.start_date && (
                     <span className="flex items-center gap-1"><Calendar size={14} /> {prog.start_date} ~ {prog.end_date || ''}</span>
                   )}

@@ -66,9 +66,9 @@ export default function Children() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">자녀 관리</h2>
-        <button onClick={openAdd} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-          <Plus size={18} /> 자녀 추가
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">자녀 관리</h2>
+        <button onClick={openAdd} className="flex items-center gap-2 bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm sm:text-base">
+          <Plus size={18} /> 추가
         </button>
       </div>
 

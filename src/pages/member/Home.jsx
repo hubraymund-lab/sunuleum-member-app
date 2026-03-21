@@ -33,9 +33,9 @@ export default function Home() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900">안녕하세요, {profile?.name || '회원'}님!</h2>
-        <p className="text-gray-500 mt-1">수눌음에 오신 것을 환영합니다</p>
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">안녕하세요, {profile?.name || '회원'}님!</h2>
+        <p className="text-gray-500 mt-1 text-sm sm:text-base">수눌음에 오신 것을 환영합니다</p>
       </div>
 
       {stats.enrollments > 0 && (
@@ -47,20 +47,20 @@ export default function Home() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         {quickLinks.map(({ to, icon: Icon, label, desc, color }) => (
-          <Link key={to} to={to} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow group">
+          <Link key={to} to={to} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 hover:shadow-md transition-shadow group active:scale-[0.98]">
             <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`${color} p-3 rounded-lg`}>
-                  <Icon size={24} className="text-white" />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className={`${color} p-2.5 sm:p-3 rounded-lg`}>
+                  <Icon size={22} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">{label}</h3>
-                  <p className="text-sm text-gray-500 mt-0.5">{desc}</p>
+                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{label}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{desc}</p>
                 </div>
               </div>
-              <ArrowRight size={20} className="text-gray-300 group-hover:text-indigo-500 transition-colors mt-1" />
+              <ArrowRight size={20} className="text-gray-300 group-hover:text-indigo-500 transition-colors mt-1 hidden sm:block" />
             </div>
           </Link>
         ))}
