@@ -194,3 +194,48 @@ CREATE POLICY "본인 회비 조회" ON fees FOR SELECT USING (member_id = auth.
 CREATE POLICY "관리자 회비 관리" ON fees FOR ALL USING (
   EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
 );
+
+-- ============================================
+-- 9. 장난감 테이블
+-- ============================================
+CREATE TABLE toys (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  category TEXT DEFAULT '일반',
+  image_url TEXT DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'available' CHECK (status IN ('available', 'rented', 'maintenance')),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 10. 장난감 대여 테이블
+CREATE TABLE toy_rentals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  toy_id UUID NOT NULL REFERENCES toys(id) ON DELETE CASCADE,
+  member_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  child_id UUID REFERENCES children(id) ON DELETE SET NULL,
+  rented_at TIMESTAMPTZ DEFAULT now(),
+  due_date DATE NOT NULL,
+  returned_at TIMESTAMPTZ,
+  status TEXT NOT NULL DEFAULT 'rented' CHECK (status IN ('rented', 'returned', 'overdue')),
+  note TEXT DEFAULT '',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS: toys
+ALTER TABLE toys ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "누구나 장난감 조회" ON toys FOR SELECT USING (true);
+CREATE POLICY "관리자 장난감 관리" ON toys FOR ALL USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+);
+
+-- RLS: toy_rentals
+ALTER TABLE toy_rentals ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "본인 대여 조회" ON toy_rentals FOR SELECT USING (member_id = auth.uid());
+CREATE POLICY "관리자 대여 조회" ON toy_rentals FOR SELECT USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+);
+CREATE POLICY "본인 대여 신청" ON toy_rentals FOR INSERT WITH CHECK (member_id = auth.uid());
+CREATE POLICY "관리자 대여 관리" ON toy_rentals FOR ALL USING (
+  EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
+);

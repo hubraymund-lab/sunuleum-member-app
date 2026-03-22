@@ -1,7 +1,7 @@
 // Created: 2026-03-18
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
-import { LayoutDashboard, Users, CalendarCheck, Wallet, BookOpen, Building2, CalendarRange, ArrowLeft, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, CalendarCheck, Wallet, BookOpen, Building2, CalendarRange, ArrowLeft, LogOut, Package } from 'lucide-react';
 
 const navItems = [
   { to: '/admin', icon: LayoutDashboard, label: '대시보드', end: true },
@@ -9,6 +9,8 @@ const navItems = [
   { to: '/admin/attendance', icon: CalendarCheck, label: '출석 관리' },
   { to: '/admin/fees', icon: Wallet, label: '회비 관리' },
   { to: '/admin/programs', icon: BookOpen, label: '프로그램 관리' },
+  { to: '/admin/toys', icon: Package, label: '장난감 관리' },
+  { to: '/admin/toy-rentals', icon: Package, label: '장난감 대여 관리' },
   { to: '/admin/facilities', icon: Building2, label: '시설 관리' },
   { to: '/admin/rentals', icon: CalendarRange, label: '대관 관리' },
 ];

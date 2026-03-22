@@ -13,6 +13,11 @@ const STYLES = {
   pending: 'bg-yellow-100 text-yellow-800',
   approved: 'bg-green-100 text-green-800',
   rejected: 'bg-red-100 text-red-800',
+  rented: 'bg-orange-100 text-orange-800',
+  returned: 'bg-green-100 text-green-800',
+  overdue: 'bg-red-100 text-red-800',
+  available: 'bg-blue-100 text-blue-800',
+  maintenance: 'bg-gray-100 text-gray-800',
 };
 
 export default function StatusBadge({ status, label }) {

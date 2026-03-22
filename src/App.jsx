@@ -24,6 +24,8 @@ import Programs from './pages/member/Programs';
 import MyEnrollments from './pages/member/MyEnrollments';
 import MyAttendance from './pages/member/MyAttendance';
 import MyFees from './pages/member/MyFees';
+import Toys from './pages/member/Toys';
+import MyToyRentals from './pages/member/MyToyRentals';
 
 // Admin pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -33,6 +35,8 @@ import AdminFees from './pages/admin/Fees';
 import AdminPrograms from './pages/admin/Programs';
 import AdminFacilities from './pages/admin/Facilities';
 import AdminRentals from './pages/admin/Rentals';
+import AdminToys from './pages/admin/Toys';
+import AdminToyRentals from './pages/admin/ToyRentals';
 
 // Public pages
 import RentalRequest from './pages/public/RentalRequest';
@@ -65,6 +69,8 @@ export default function App() {
                 <Route path="/my/enrollments" element={<MyEnrollments />} />
                 <Route path="/my/attendance" element={<MyAttendance />} />
                 <Route path="/my/fees" element={<MyFees />} />
+                <Route path="/toys" element={<Toys />} />
+                <Route path="/my/toys" element={<MyToyRentals />} />
               </Route>
 
               {/* Admin routes (authenticated + admin role) */}
@@ -77,6 +83,8 @@ export default function App() {
                   <Route path="/admin/programs" element={<AdminPrograms />} />
                   <Route path="/admin/facilities" element={<AdminFacilities />} />
                   <Route path="/admin/rentals" element={<AdminRentals />} />
+                  <Route path="/admin/toys" element={<AdminToys />} />
+                  <Route path="/admin/toy-rentals" element={<AdminToyRentals />} />
                 </Route>
               </Route>
             </Route>
