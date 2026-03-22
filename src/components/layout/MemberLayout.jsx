@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
-import { Home, User, Baby, BookOpen, CalendarCheck, Wallet, LogOut, Shield, Menu, X, Package } from 'lucide-react';
+import { Home, User, Baby, BookOpen, CalendarCheck, Wallet, LogOut, Shield, Menu, X, Package, Building2 } from 'lucide-react';
 
 const navItems = [
   { to: '/', icon: Home, label: '홈', end: true },
@@ -10,6 +10,7 @@ const navItems = [
   { to: '/children', icon: Baby, label: '자녀 관리' },
   { to: '/programs', icon: BookOpen, label: '프로그램' },
   { to: '/toys', icon: Package, label: '장난감 대여' },
+  { to: '/rental-request', icon: Building2, label: '대관 신청' },
   { to: '/my/attendance', icon: CalendarCheck, label: '출석 내역' },
   { to: '/my/fees', icon: Wallet, label: '회비 내역' },
 ];

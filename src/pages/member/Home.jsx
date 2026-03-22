@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
-import { BookOpen, Baby, CalendarCheck, Wallet, ArrowRight } from 'lucide-react';
+import { BookOpen, Baby, CalendarCheck, Wallet, ArrowRight, Package, Building2 } from 'lucide-react';
 
 export default function Home() {
   const { profile } = useAuth();
@@ -29,6 +29,8 @@ export default function Home() {
     { to: '/children', icon: Baby, label: '자녀 관리', desc: `${stats.children}명 등록`, color: 'bg-pink-500' },
     { to: '/my/attendance', icon: CalendarCheck, label: '출석 내역', desc: '올해 출석 기록 보기', color: 'bg-green-500' },
     { to: '/my/fees', icon: Wallet, label: '회비 내역', desc: '납부 현황 확인', color: 'bg-amber-500' },
+    { to: '/toys', icon: Package, label: '장난감 대여', desc: '장난감 목록 및 대여 신청', color: 'bg-orange-500' },
+    { to: '/rental-request', icon: Building2, label: '대관 신청', desc: '시설 대관 신청하기', color: 'bg-teal-500' },
   ];
 
   return (
