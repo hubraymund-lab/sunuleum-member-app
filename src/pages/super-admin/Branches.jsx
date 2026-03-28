@@ -105,7 +105,8 @@ export default function SuperAdminBranches() {
       .eq('branch_id', branchId)
       .eq('status', 'active')
       .order('joined_at');
-    if (error) console.error('fetchBranchMembers error:', error);
+    // 디버그용 알림 (문제 해결 후 제거)
+    alert(`branchId: ${branchId}\n결과: ${data?.length || 0}건\n에러: ${error ? JSON.stringify(error) : '없음'}`);
     setBranchMembers(data || []);
     setLoadingMembers(false);
   }
