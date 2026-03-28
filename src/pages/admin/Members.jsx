@@ -24,19 +24,28 @@ export default function AdminMembers() {
 
   useEffect(() => { fetchMembers(); }, [branchId]);
 
+  const [debug, setDebug] = useState('');
+
   async function fetchMembers() {
-    // profiles 기반 조회 (branch_members 조인 문제 우회)
-    const { data: profiles } = await supabase
+    const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
 
-    const { data: memberships } = await supabase
+    const { data: memberships, error: membershipsError } = await supabase
       .from('branch_members')
       .select('*')
       .eq('branch_id', branchId);
 
-    // branch_members에 있는 회원만 필터링하고 합치기
+    // 디버그 정보
+    setDebug(
+      `branchId: ${branchId}\n` +
+      `profiles: ${profiles?.length || 0}건 (에러: ${profilesError ? JSON.stringify(profilesError) : '없음'})\n` +
+      `memberships: ${memberships?.length || 0}건 (에러: ${membershipsError ? JSON.stringify(membershipsError) : '없음'})\n` +
+      `profiles IDs: ${(profiles || []).map(p => p.id.slice(0,8)).join(', ')}\n` +
+      `memberships user_ids: ${(memberships || []).map(m => m.user_id.slice(0,8)).join(', ')}`
+    );
+
     const memberMap = new Map((memberships || []).map(m => [m.user_id, m]));
     const merged = (profiles || [])
       .filter(p => memberMap.has(p.id))
@@ -128,6 +137,11 @@ export default function AdminMembers() {
           </button>
         </div>
       </div>
+
+      {/* 디버그 정보 (문제 해결 후 제거) */}
+      {debug && (
+        <pre className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 mb-4 text-xs text-gray-700 whitespace-pre-wrap">{debug}</pre>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <table className="w-full">
