@@ -99,24 +99,14 @@ export default function SuperAdminBranches() {
 
   async function fetchBranchMembers(branchId) {
     setLoadingMembers(true);
-    const { data, error } = await supabase.rpc('get_branch_members', { p_branch_id: branchId });
+    const { data, error } = await supabase
+      .from('branch_members')
+      .select('*, profile:profiles(id, name, email, phone)')
+      .eq('branch_id', branchId)
+      .eq('status', 'active')
+      .order('joined_at');
     if (error) console.error('fetchBranchMembers error:', error);
-    // RPC 결과를 기존 구조에 맞게 변환
-    const mapped = (data || []).map(m => ({
-      id: m.id,
-      branch_id: m.branch_id,
-      user_id: m.user_id,
-      role: m.role,
-      status: m.status,
-      joined_at: m.joined_at,
-      profile: {
-        id: m.profile_id,
-        name: m.profile_name,
-        email: m.profile_email,
-        phone: m.profile_phone,
-      },
-    }));
-    setBranchMembers(mapped);
+    setBranchMembers(data || []);
     setLoadingMembers(false);
   }
 
