@@ -20,7 +20,13 @@ export default function Callback() {
             if (!data?.name) {
               navigate('/auth/complete-profile', { replace: true });
             } else {
-              navigate('/', { replace: true });
+              const checkinRedirect = sessionStorage.getItem('checkin-redirect');
+              if (checkinRedirect) {
+                sessionStorage.removeItem('checkin-redirect');
+                navigate(checkinRedirect, { replace: true });
+              } else {
+                navigate('/', { replace: true });
+              }
             }
           });
       }

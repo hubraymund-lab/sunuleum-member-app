@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { NavLink, Outlet, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { useBranch } from '../../lib/branch';
-import { Home, User, Baby, BookOpen, CalendarCheck, Wallet, LogOut, Shield, Menu, X, Package, Building2, Settings } from 'lucide-react';
+import { Home, User, Baby, BookOpen, CalendarCheck, Wallet, LogOut, Shield, Menu, X, Package, Building2, Settings, MapPin } from 'lucide-react';
 
 export default function MemberLayout() {
   const { profile, signOut, isSuperAdmin } = useAuth();
@@ -23,6 +23,7 @@ export default function MemberLayout() {
     { to: '/rental-request', icon: Building2, label: '대관 신청' },
     { to: `${base}/my/attendance`, icon: CalendarCheck, label: '출석 내역' },
     { to: `${base}/my/fees`, icon: Wallet, label: '회비 내역' },
+    { to: `${base}/my/visits`, icon: MapPin, label: '방문 내역' },
   ];
 
   const navLinkClass = ({ isActive }) =>

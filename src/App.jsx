@@ -36,6 +36,8 @@ import MyAttendance from './pages/member/MyAttendance';
 import MyFees from './pages/member/MyFees';
 import Toys from './pages/member/Toys';
 import MyToyRentals from './pages/member/MyToyRentals';
+import Checkin from './pages/member/Checkin';
+import MyVisits from './pages/member/MyVisits';
 
 // Admin pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -47,6 +49,7 @@ import AdminFacilities from './pages/admin/Facilities';
 import AdminRentals from './pages/admin/Rentals';
 import AdminToys from './pages/admin/Toys';
 import AdminToyRentals from './pages/admin/ToyRentals';
+import AdminVisits from './pages/admin/Visits';
 
 // Super Admin pages
 import SuperAdminDashboard from './pages/super-admin/Dashboard';
@@ -90,6 +93,7 @@ export default function App() {
 
                 {/* Branch-scoped routes */}
                 <Route path="/branch/:branchId" element={<BranchGuard />}>
+                  <Route path="checkin" element={<Checkin />} />
                   <Route element={<MemberLayout />}>
                     <Route index element={<Home />} />
                     <Route path="profile" element={<Profile />} />
@@ -100,6 +104,7 @@ export default function App() {
                     <Route path="my/attendance" element={<MyAttendance />} />
                     <Route path="my/fees" element={<MyFees />} />
                     <Route path="my/toys" element={<MyToyRentals />} />
+                    <Route path="my/visits" element={<MyVisits />} />
                   </Route>
 
                   {/* Branch admin routes */}
@@ -114,6 +119,7 @@ export default function App() {
                       <Route path="admin/rentals" element={<AdminRentals />} />
                       <Route path="admin/toys" element={<AdminToys />} />
                       <Route path="admin/toy-rentals" element={<AdminToyRentals />} />
+                      <Route path="admin/visits" element={<AdminVisits />} />
                     </Route>
                   </Route>
                 </Route>

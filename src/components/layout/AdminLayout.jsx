@@ -2,7 +2,7 @@
 import { NavLink, Outlet, useParams } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { useBranch } from '../../lib/branch';
-import { LayoutDashboard, Users, CalendarCheck, Wallet, BookOpen, Building2, CalendarRange, ArrowLeft, LogOut, Package } from 'lucide-react';
+import { LayoutDashboard, Users, CalendarCheck, Wallet, BookOpen, Building2, CalendarRange, ArrowLeft, LogOut, Package, MapPin } from 'lucide-react';
 
 export default function AdminLayout() {
   const { profile, signOut } = useAuth();
@@ -21,6 +21,7 @@ export default function AdminLayout() {
     { to: `${base}/toy-rentals`, icon: Package, label: '장난감 대여 관리' },
     { to: `${base}/facilities`, icon: Building2, label: '시설 관리' },
     { to: `${base}/rentals`, icon: CalendarRange, label: '대관 관리' },
+    { to: `${base}/visits`, icon: MapPin, label: '방문 관리' },
   ];
 
   return (
