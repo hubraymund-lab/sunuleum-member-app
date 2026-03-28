@@ -37,15 +37,6 @@ export default function AdminMembers() {
       .select('*')
       .eq('branch_id', branchId);
 
-    // 디버그 정보
-    setDebug(
-      `branchId: ${branchId}\n` +
-      `profiles: ${profiles?.length || 0}건 (에러: ${profilesError ? JSON.stringify(profilesError) : '없음'})\n` +
-      `memberships: ${memberships?.length || 0}건 (에러: ${membershipsError ? JSON.stringify(membershipsError) : '없음'})\n` +
-      `profiles IDs: ${(profiles || []).map(p => p.id.slice(0,8)).join(', ')}\n` +
-      `memberships user_ids: ${(memberships || []).map(m => m.user_id.slice(0,8)).join(', ')}`
-    );
-
     const memberMap = new Map((memberships || []).map(m => [m.user_id, m]));
     const merged = (profiles || [])
       .filter(p => memberMap.has(p.id))
@@ -61,6 +52,15 @@ export default function AdminMembers() {
           profile: p,
         };
       });
+
+    // 디버그 정보
+    setDebug(
+      `branchId: ${branchId}\n` +
+      `profiles: ${profiles?.length || 0}건 | memberships: ${memberships?.length || 0}건\n` +
+      `merged: ${merged.length}건\n` +
+      `merged 상세: ${JSON.stringify(merged.map(m => ({ name: m.profile?.name, status: m.status, role: m.role })))}\n` +
+      `statusFilter: "${statusFilter}"`
+    );
 
     setMembers(merged);
     setLoading(false);
