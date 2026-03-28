@@ -1,5 +1,6 @@
 // Created: 2026-03-18
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import StatusBadge from '../../components/common/StatusBadge';
 import Modal from '../../components/common/Modal';
@@ -10,6 +11,7 @@ import { Search, Download, Edit, Trash2, Eye, Baby } from 'lucide-react';
 const STATUS_LABELS = { active: '활동', inactive: '휴면', withdrawn: '탈퇴' };
 
 export default function AdminMembers() {
+  const { branchId } = useParams();
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -20,35 +22,42 @@ export default function AdminMembers() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [form, setForm] = useState({ name: '', phone: '', status: 'active' });
 
-  useEffect(() => { fetchMembers(); }, []);
+  useEffect(() => { fetchMembers(); }, [branchId]);
 
   async function fetchMembers() {
-    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase
+      .from('branch_members')
+      .select('*, profile:profiles(*)')
+      .eq('branch_id', branchId)
+      .order('created_at', { ascending: false });
     setMembers(data || []);
     setLoading(false);
   }
 
   async function viewDetail(member) {
     setDetailMember(member);
-    const { data } = await supabase.from('children').select('*').eq('parent_id', member.id);
+    const { data } = await supabase.from('children').select('*').eq('parent_id', member.profile?.id);
     setChildren(data || []);
   }
 
   function openEdit(member) {
     setEditingMember(member);
-    setForm({ name: member.name, phone: member.phone || '', status: member.status });
+    setForm({ name: member.profile?.name || '', phone: member.profile?.phone || '', status: member.status, role: member.role || 'member' });
   }
 
   async function handleSave(e) {
     e.preventDefault();
-    await supabase.from('profiles').update(form).eq('id', editingMember.id);
+    // Update profile info (name, phone)
+    await supabase.from('profiles').update({ name: form.name, phone: form.phone }).eq('id', editingMember.profile?.id);
+    // Update branch_members info (status, role)
+    await supabase.from('branch_members').update({ status: form.status, role: form.role }).eq('id', editingMember.id);
     setEditingMember(null);
     fetchMembers();
   }
 
   async function handleDelete() {
     if (deleteTarget) {
-      await supabase.from('profiles').update({ status: 'withdrawn' }).eq('id', deleteTarget.id);
+      await supabase.from('branch_members').update({ status: 'withdrawn' }).eq('id', deleteTarget.id);
       setDeleteTarget(null);
       fetchMembers();
     }
@@ -56,16 +65,17 @@ export default function AdminMembers() {
 
   function handleExport() {
     exportToCSV(filtered, '회원목록.csv', [
-      { label: '이름', accessor: 'name' },
-      { label: '이메일', accessor: 'email' },
-      { label: '연락처', accessor: 'phone' },
-      { label: '가입일', accessor: 'join_date' },
+      { label: '이름', accessor: m => m.profile?.name || '' },
+      { label: '이메일', accessor: m => m.profile?.email || '' },
+      { label: '연락처', accessor: m => m.profile?.phone || '' },
+      { label: '가입일', accessor: m => m.joined_at?.slice(0, 10) || '' },
       { label: '상태', accessor: m => STATUS_LABELS[m.status] },
     ]);
   }
 
   const filtered = members.filter(m => {
-    const matchSearch = !search || m.name?.includes(search) || m.email?.includes(search) || m.phone?.includes(search);
+    const p = m.profile || {};
+    const matchSearch = !search || p.name?.includes(search) || p.email?.includes(search) || p.phone?.includes(search);
     const matchStatus = statusFilter === 'all' || m.status === statusFilter;
     return matchSearch && matchStatus;
   });
@@ -115,10 +125,10 @@ export default function AdminMembers() {
               <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-400">회원이 없습니다</td></tr>
             ) : filtered.map(m => (
               <tr key={m.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 font-medium text-gray-900">{m.name || '(미입력)'}</td>
-                <td className="px-6 py-4 text-gray-600 text-sm">{m.email}</td>
-                <td className="px-6 py-4 text-gray-600">{m.phone || '-'}</td>
-                <td className="px-6 py-4 text-gray-600">{m.join_date}</td>
+                <td className="px-6 py-4 font-medium text-gray-900">{m.profile?.name || '(미입력)'}</td>
+                <td className="px-6 py-4 text-gray-600 text-sm">{m.profile?.email}</td>
+                <td className="px-6 py-4 text-gray-600">{m.profile?.phone || '-'}</td>
+                <td className="px-6 py-4 text-gray-600">{m.joined_at?.slice(0, 10)}</td>
                 <td className="px-6 py-4"><StatusBadge status={m.status} label={STATUS_LABELS[m.status]} /></td>
                 <td className="px-6 py-4 text-right">
                   <button onClick={() => viewDetail(m)} className="text-gray-400 hover:text-indigo-600 mr-2"><Eye size={16} /></button>
@@ -133,12 +143,12 @@ export default function AdminMembers() {
 
       {/* Detail modal */}
       {detailMember && (
-        <Modal title={`${detailMember.name} 상세`} onClose={() => setDetailMember(null)} maxWidth="max-w-lg">
+        <Modal title={`${detailMember.profile?.name || ''} 상세`} onClose={() => setDetailMember(null)} maxWidth="max-w-lg">
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><span className="text-gray-500">이메일:</span> <span className="text-gray-900">{detailMember.email}</span></div>
-              <div><span className="text-gray-500">연락처:</span> <span className="text-gray-900">{detailMember.phone || '-'}</span></div>
-              <div><span className="text-gray-500">가입일:</span> <span className="text-gray-900">{detailMember.join_date}</span></div>
+              <div><span className="text-gray-500">이메일:</span> <span className="text-gray-900">{detailMember.profile?.email}</span></div>
+              <div><span className="text-gray-500">연락처:</span> <span className="text-gray-900">{detailMember.profile?.phone || '-'}</span></div>
+              <div><span className="text-gray-500">가입일:</span> <span className="text-gray-900">{detailMember.joined_at?.slice(0, 10)}</span></div>
               <div><span className="text-gray-500">상태:</span> <StatusBadge status={detailMember.status} label={STATUS_LABELS[detailMember.status]} /></div>
             </div>
             <div>
@@ -185,7 +195,7 @@ export default function AdminMembers() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">역할</label>
-              <select value={editingMember.role} onChange={e => setForm({ ...form, role: e.target.value })}
+              <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 <option value="member">회원</option>
                 <option value="admin">관리자</option>
@@ -200,7 +210,7 @@ export default function AdminMembers() {
       )}
 
       {deleteTarget && (
-        <ConfirmDialog title="회원 탈퇴 처리" message={`${deleteTarget.name}을(를) 탈퇴 처리하시겠습니까?`}
+        <ConfirmDialog title="회원 탈퇴 처리" message={`${deleteTarget.profile?.name || ''}을(를) 탈퇴 처리하시겠습니까?`}
           confirmLabel="탈퇴 처리" danger onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} />
       )}
     </div>

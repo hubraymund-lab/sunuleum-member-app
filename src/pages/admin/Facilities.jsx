@@ -1,11 +1,13 @@
 // Created: 2026-03-18
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import Modal from '../../components/common/Modal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { Plus, Edit, Trash2, Building2 } from 'lucide-react';
 
 export default function AdminFacilities() {
+  const { branchId } = useParams();
   const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -13,10 +15,10 @@ export default function AdminFacilities() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [form, setForm] = useState({ name: '', description: '', capacity: 0 });
 
-  useEffect(() => { fetchFacilities(); }, []);
+  useEffect(() => { fetchFacilities(); }, [branchId]);
 
   async function fetchFacilities() {
-    const { data } = await supabase.from('facilities').select('*').order('name');
+    const { data } = await supabase.from('facilities').select('*').eq('branch_id', branchId).order('name');
     setFacilities(data || []);
     setLoading(false);
   }
@@ -27,7 +29,7 @@ export default function AdminFacilities() {
   async function handleSave(e) {
     e.preventDefault();
     if (editing) await supabase.from('facilities').update(form).eq('id', editing.id);
-    else await supabase.from('facilities').insert(form);
+    else await supabase.from('facilities').insert({ ...form, branch_id: branchId });
     setShowModal(false); fetchFacilities();
   }
 

@@ -1,5 +1,6 @@
 // Created: 2026-03-22
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import StatusBadge from '../../components/common/StatusBadge';
 import { Package } from 'lucide-react';
@@ -7,15 +8,17 @@ import { Package } from 'lucide-react';
 const STATUS_LABELS = { rented: '대여중', returned: '반납', overdue: '연체' };
 
 export default function AdminToyRentals() {
+  const { branchId } = useParams();
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
 
-  useEffect(() => { fetchRentals(); }, []);
+  useEffect(() => { fetchRentals(); }, [branchId]);
 
   async function fetchRentals() {
     const { data } = await supabase.from('toy_rentals')
       .select('*, toy:toys(name, category), member:profiles(name, email), child:children(name)')
+      .eq('branch_id', branchId)
       .order('created_at', { ascending: false });
     setRentals(data || []);
     setLoading(false);

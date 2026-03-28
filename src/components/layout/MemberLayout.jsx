@@ -1,23 +1,29 @@
 // Created: 2026-03-18
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
-import { Home, User, Baby, BookOpen, CalendarCheck, Wallet, LogOut, Shield, Menu, X, Package, Building2 } from 'lucide-react';
-
-const navItems = [
-  { to: '/', icon: Home, label: '홈', end: true },
-  { to: '/profile', icon: User, label: '내 프로필' },
-  { to: '/children', icon: Baby, label: '자녀 관리' },
-  { to: '/programs', icon: BookOpen, label: '프로그램' },
-  { to: '/toys', icon: Package, label: '장난감 대여' },
-  { to: '/rental-request', icon: Building2, label: '대관 신청' },
-  { to: '/my/attendance', icon: CalendarCheck, label: '출석 내역' },
-  { to: '/my/fees', icon: Wallet, label: '회비 내역' },
-];
+import { useBranch } from '../../lib/branch';
+import { Home, User, Baby, BookOpen, CalendarCheck, Wallet, LogOut, Shield, Menu, X, Package, Building2, Settings } from 'lucide-react';
 
 export default function MemberLayout() {
-  const { profile, signOut, isAdmin } = useAuth();
+  const { profile, signOut, isSuperAdmin } = useAuth();
+  const { currentBranch, isBranchAdmin, branches, switchBranch } = useBranch();
+  const { branchId } = useParams();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const base = `/branch/${branchId}`;
+
+  const navItems = [
+    { to: base, icon: Home, label: '홈', end: true },
+    { to: `${base}/profile`, icon: User, label: '내 프로필' },
+    { to: `${base}/children`, icon: Baby, label: '자녀 관리' },
+    { to: `${base}/programs`, icon: BookOpen, label: '프로그램' },
+    { to: `${base}/toys`, icon: Package, label: '장난감 대여' },
+    { to: '/rental-request', icon: Building2, label: '대관 신청' },
+    { to: `${base}/my/attendance`, icon: CalendarCheck, label: '출석 내역' },
+    { to: `${base}/my/fees`, icon: Wallet, label: '회비 내역' },
+  ];
 
   const navLinkClass = ({ isActive }) =>
     `flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors ${
@@ -27,8 +33,22 @@ export default function MemberLayout() {
   const sidebarContent = (
     <>
       <div className="p-6">
-        <h1 className="text-xl font-bold text-indigo-600">수눌음</h1>
+        <h1 className="text-xl font-bold text-indigo-600">수눌음 - {currentBranch?.name}</h1>
         <p className="text-sm text-gray-500 mt-1">{profile?.name || '회원'}님, 환영합니다</p>
+        {branches.length > 1 && (
+          <select
+            value={currentBranch?.id || ''}
+            onChange={(e) => {
+              switchBranch(e.target.value);
+              navigate(`/branch/${e.target.value}`);
+            }}
+            className="mt-2 w-full text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600"
+          >
+            {branches.map(b => (
+              <option key={b.id} value={b.id}>{b.name}</option>
+            ))}
+          </select>
+        )}
       </div>
       <nav className="mt-2 flex-1">
         {navItems.map(({ to, icon: Icon, label, end }) => (
@@ -38,11 +58,18 @@ export default function MemberLayout() {
             {label}
           </NavLink>
         ))}
-        {isAdmin && (
-          <NavLink to="/admin" className={navLinkClass}
+        {(isBranchAdmin || isSuperAdmin) && (
+          <NavLink to={`${base}/admin`} className={navLinkClass}
             onClick={() => setSidebarOpen(false)}>
             <Shield size={20} />
             관리자 패널
+          </NavLink>
+        )}
+        {isSuperAdmin && (
+          <NavLink to="/super-admin" className={navLinkClass}
+            onClick={() => setSidebarOpen(false)}>
+            <Settings size={20} />
+            시스템 관리
           </NavLink>
         )}
       </nav>
@@ -58,7 +85,7 @@ export default function MemberLayout() {
     <div className="min-h-screen bg-gray-50 flex">
       {/* Mobile header */}
       <header className="md:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 flex items-center justify-between px-4 h-14">
-        <h1 className="text-lg font-bold text-indigo-600">수눌음</h1>
+        <h1 className="text-lg font-bold text-indigo-600">수눌음 - {currentBranch?.name}</h1>
         <button onClick={() => setSidebarOpen(true)} className="p-2 -mr-2 text-gray-600 hover:text-gray-900">
           <Menu size={24} />
         </button>

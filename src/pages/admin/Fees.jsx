@@ -1,5 +1,6 @@
 // Created: 2026-03-18
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import Modal from '../../components/common/Modal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
@@ -8,6 +9,7 @@ import { exportToCSV } from '../../utils/csv';
 import { Plus, Edit, Trash2, Download, Search } from 'lucide-react';
 
 export default function AdminFees() {
+  const { branchId } = useParams();
   const [fees, setFees] = useState([]);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,15 +21,15 @@ export default function AdminFees() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [form, setForm] = useState({ member_id: '', month: new Date().toISOString().slice(0, 7), amount: 10000, paid_date: '', status: 'unpaid' });
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [branchId]);
 
   async function fetchData() {
     const [f, m] = await Promise.all([
-      supabase.from('fees').select('*').order('month', { ascending: false }),
-      supabase.from('profiles').select('id, name').neq('status', 'withdrawn'),
+      supabase.from('fees').select('*').eq('branch_id', branchId).order('month', { ascending: false }),
+      supabase.from('branch_members').select('profile_id, profile:profiles(id, name)').eq('branch_id', branchId).eq('status', 'active'),
     ]);
     setFees(f.data || []);
-    setMembers(m.data || []);
+    setMembers((m.data || []).map(bm => ({ id: bm.profile?.id || bm.profile_id, name: bm.profile?.name })));
     setLoading(false);
   }
 
@@ -45,7 +47,7 @@ export default function AdminFees() {
     e.preventDefault();
     const data = { ...form, status: form.paid_date ? 'paid' : form.status };
     if (editing) await supabase.from('fees').update(data).eq('id', editing.id);
-    else await supabase.from('fees').insert(data);
+    else await supabase.from('fees').insert({ ...data, branch_id: branchId });
     setShowModal(false); fetchData();
   }
 

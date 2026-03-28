@@ -1,5 +1,6 @@
 // Created: 2026-03-22
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import Modal from '../../components/common/Modal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
@@ -10,6 +11,7 @@ const STATUS_LABELS = { available: '대여가능', rented: '대여중', maintena
 const CATEGORIES = ['일반', '교육', '야외', '퍼즐', '블록', '인형'];
 
 export default function AdminToys() {
+  const { branchId } = useParams();
   const [toys, setToys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -18,10 +20,10 @@ export default function AdminToys() {
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({ name: '', description: '', category: '일반', image_url: '', status: 'available' });
 
-  useEffect(() => { fetchToys(); }, []);
+  useEffect(() => { fetchToys(); }, [branchId]);
 
   async function fetchToys() {
-    const { data } = await supabase.from('toys').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('toys').select('*').eq('branch_id', branchId).order('created_at', { ascending: false });
     setToys(data || []);
     setLoading(false);
   }
@@ -32,7 +34,7 @@ export default function AdminToys() {
   async function handleSave(e) {
     e.preventDefault();
     if (editing) await supabase.from('toys').update(form).eq('id', editing.id);
-    else await supabase.from('toys').insert(form);
+    else await supabase.from('toys').insert({ ...form, branch_id: branchId });
     setShowModal(false); fetchToys();
   }
 

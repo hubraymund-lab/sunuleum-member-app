@@ -1,5 +1,6 @@
 // Created: 2026-03-18
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -8,17 +9,19 @@ import { BookOpen } from 'lucide-react';
 const STATUS_LABELS = { enrolled: '참여중', cancelled: '취소', completed: '완료' };
 
 export default function MyEnrollments() {
+  const { branchId } = useParams();
   const { profile } = useAuth();
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchEnrollments(); }, [profile]);
+  useEffect(() => { fetchEnrollments(); }, [profile, branchId]);
 
   async function fetchEnrollments() {
     if (!profile) return;
     const { data } = await supabase
       .from('enrollments')
       .select('*, program:programs(*), child:children(name, birth_year)')
+      .eq('branch_id', branchId)
       .eq('member_id', profile.id)
       .order('enrolled_at', { ascending: false });
     setEnrollments(data || []);

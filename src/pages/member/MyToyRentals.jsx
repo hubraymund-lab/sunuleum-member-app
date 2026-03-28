@@ -1,5 +1,6 @@
 // Created: 2026-03-22
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -9,17 +10,19 @@ const STATUS_LABELS = { rented: '대여중', returned: '반납완료', overdue: 
 const CATEGORY_COLORS = { '영아': 'bg-pink-100 text-pink-700', '유아': 'bg-blue-100 text-blue-700', '초등': 'bg-green-100 text-green-700' };
 
 export default function MyToyRentals() {
+  const { branchId } = useParams();
   const { profile } = useAuth();
   const [rentals, setRentals] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchRentals(); }, [profile]);
+  useEffect(() => { fetchRentals(); }, [profile, branchId]);
 
   async function fetchRentals() {
     if (!profile) return;
     const { data } = await supabase
       .from('toy_rentals')
       .select('*, toy:toys(name, category), child:children(name)')
+      .eq('branch_id', branchId)
       .eq('member_id', profile.id)
       .order('rented_at', { ascending: false });
     setRentals(data || []);

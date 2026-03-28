@@ -1,5 +1,6 @@
 // Created: 2026-03-18
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import Modal from '../../components/common/Modal';
 import { exportToCSV } from '../../utils/csv';
@@ -8,6 +9,7 @@ import { Plus, Trash2, Download, Search } from 'lucide-react';
 const ACTIVITY_TYPES = ['정기모임', '봉사활동', '특별활동', '기타'];
 
 export default function AdminAttendance() {
+  const { branchId } = useParams();
   const [records, setRecords] = useState([]);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,15 +19,15 @@ export default function AdminAttendance() {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ member_id: '', date: new Date().toISOString().slice(0, 10), type: '정기모임', note: '' });
 
-  useEffect(() => { fetchData(); }, [year]);
+  useEffect(() => { fetchData(); }, [year, branchId]);
 
   async function fetchData() {
     const [r, m] = await Promise.all([
-      supabase.from('attendance').select('*').gte('date', `${year}-01-01`).lte('date', `${year}-12-31`).order('date', { ascending: false }),
-      supabase.from('profiles').select('id, name').neq('status', 'withdrawn'),
+      supabase.from('attendance').select('*').eq('branch_id', branchId).gte('date', `${year}-01-01`).lte('date', `${year}-12-31`).order('date', { ascending: false }),
+      supabase.from('branch_members').select('profile_id, profile:profiles(id, name)').eq('branch_id', branchId).eq('status', 'active'),
     ]);
     setRecords(r.data || []);
-    setMembers(m.data || []);
+    setMembers((m.data || []).map(bm => ({ id: bm.profile?.id || bm.profile_id, name: bm.profile?.name })));
     setLoading(false);
   }
 
@@ -35,7 +37,7 @@ export default function AdminAttendance() {
   async function handleAdd(e) {
     e.preventDefault();
     if (!form.member_id) return;
-    await supabase.from('attendance').insert(form);
+    await supabase.from('attendance').insert({ ...form, branch_id: branchId });
     setShowModal(false);
     setForm({ member_id: '', date: new Date().toISOString().slice(0, 10), type: '정기모임', note: '' });
     fetchData();

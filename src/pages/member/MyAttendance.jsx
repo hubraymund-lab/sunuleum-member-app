@@ -1,5 +1,6 @@
 // Created: 2026-03-18
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import { CalendarCheck } from 'lucide-react';
@@ -12,18 +13,20 @@ const TYPE_COLORS = {
 };
 
 export default function MyAttendance() {
+  const { branchId } = useParams();
   const { profile } = useAuth();
   const [records, setRecords] = useState([]);
   const [year, setYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchAttendance(); }, [profile, year]);
+  useEffect(() => { fetchAttendance(); }, [profile, year, branchId]);
 
   async function fetchAttendance() {
     if (!profile) return;
     const { data } = await supabase
       .from('attendance')
       .select('*')
+      .eq('branch_id', branchId)
       .eq('member_id', profile.id)
       .gte('date', `${year}-01-01`)
       .lte('date', `${year}-12-31`)

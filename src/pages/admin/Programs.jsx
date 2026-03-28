@@ -1,5 +1,6 @@
 // Created: 2026-03-18
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import Modal from '../../components/common/Modal';
@@ -11,6 +12,7 @@ const STATUS_LABELS = { open: '모집중', closed: '마감', cancelled: '취소'
 const emptyForm = { title: '', description: '', category: '정기', start_date: '', end_date: '', capacity: 0, fee: 0, status: 'open' };
 
 export default function AdminPrograms() {
+  const { branchId } = useParams();
   const { profile } = useAuth();
   const [programs, setPrograms] = useState([]);
   const [enrollCounts, setEnrollCounts] = useState({});
@@ -20,14 +22,14 @@ export default function AdminPrograms() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [form, setForm] = useState(emptyForm);
 
-  useEffect(() => { fetchPrograms(); }, []);
+  useEffect(() => { fetchPrograms(); }, [branchId]);
 
   async function fetchPrograms() {
-    const { data } = await supabase.from('programs').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('programs').select('*').eq('branch_id', branchId).order('created_at', { ascending: false });
     setPrograms(data || []);
 
     // Get enrollment counts
-    const { data: enrollments } = await supabase.from('enrollments').select('program_id').eq('status', 'enrolled');
+    const { data: enrollments } = await supabase.from('enrollments').select('program_id').eq('branch_id', branchId).eq('status', 'enrolled');
     const counts = {};
     (enrollments || []).forEach(e => { counts[e.program_id] = (counts[e.program_id] || 0) + 1; });
     setEnrollCounts(counts);
@@ -56,7 +58,7 @@ export default function AdminPrograms() {
     if (editing) {
       await supabase.from('programs').update(form).eq('id', editing.id);
     } else {
-      await supabase.from('programs').insert({ ...form, created_by: profile.id });
+      await supabase.from('programs').insert({ ...form, created_by: profile.id, branch_id: branchId });
     }
     setShowModal(false);
     fetchPrograms();

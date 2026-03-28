@@ -1,23 +1,26 @@
 // Created: 2026-03-18
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import StatusBadge from '../../components/common/StatusBadge';
 import { Wallet, CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function MyFees() {
+  const { branchId } = useParams();
   const { profile } = useAuth();
   const [fees, setFees] = useState([]);
   const [year, setYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchFees(); }, [profile, year]);
+  useEffect(() => { fetchFees(); }, [profile, year, branchId]);
 
   async function fetchFees() {
     if (!profile) return;
     const { data } = await supabase
       .from('fees')
       .select('*')
+      .eq('branch_id', branchId)
       .eq('member_id', profile.id)
       .gte('month', `${year}-01`)
       .lte('month', `${year}-12`)

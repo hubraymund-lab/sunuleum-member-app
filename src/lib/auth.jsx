@@ -75,6 +75,7 @@ export function AuthProvider({ children }) {
       signInWithGoogle, signInWithKakao, signOut,
       updateProfile, fetchProfile: () => fetchProfile(session?.user?.id),
       isAdmin: profile?.role === 'admin',
+      isSuperAdmin: profile?.system_role === 'super_admin',
       isAuthenticated: !!session,
       needsProfile: !!session && profile && !profile.name,
     }}>

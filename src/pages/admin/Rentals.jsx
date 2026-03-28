@@ -1,5 +1,6 @@
 // Created: 2026-03-18
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -8,18 +9,19 @@ import { CalendarRange, Check, X as XIcon } from 'lucide-react';
 const STATUS_LABELS = { pending: '대기', approved: '승인', rejected: '거절', cancelled: '취소' };
 
 export default function AdminRentals() {
+  const { branchId } = useParams();
   const { profile } = useAuth();
   const [rentals, setRentals] = useState([]);
   const [facilities, setFacilities] = useState({});
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(); }, [branchId]);
 
   async function fetchData() {
     const [r, f] = await Promise.all([
-      supabase.from('rentals').select('*').order('date', { ascending: false }),
-      supabase.from('facilities').select('id, name'),
+      supabase.from('rentals').select('*').eq('branch_id', branchId).order('date', { ascending: false }),
+      supabase.from('facilities').select('id, name').eq('branch_id', branchId),
     ]);
     setRentals(r.data || []);
     const map = {};

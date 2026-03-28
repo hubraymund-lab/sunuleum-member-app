@@ -1,5 +1,6 @@
 // Created: 2026-03-22
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -9,6 +10,7 @@ const STATUS_LABELS = { available: '대여가능', rented: '대여중', maintena
 const CATEGORY_COLORS = { '영아': 'bg-pink-100 text-pink-700', '유아': 'bg-blue-100 text-blue-700', '초등': 'bg-green-100 text-green-700' };
 
 export default function Toys() {
+  const { branchId } = useParams();
   const { profile } = useAuth();
   const [toys, setToys] = useState([]);
   const [rentals, setRentals] = useState([]);
@@ -19,13 +21,13 @@ export default function Toys() {
   const [selectedChild, setSelectedChild] = useState('');
   const [dueDate, setDueDate] = useState('');
 
-  useEffect(() => { fetchData(); }, [profile]);
+  useEffect(() => { fetchData(); }, [profile, branchId]);
 
   async function fetchData() {
     if (!profile) return;
     const [t, r, c] = await Promise.all([
-      supabase.from('toys').select('*').order('name'),
-      supabase.from('toy_rentals').select('*').eq('member_id', profile.id).eq('status', 'rented'),
+      supabase.from('toys').select('*').eq('branch_id', branchId).order('name'),
+      supabase.from('toy_rentals').select('*').eq('branch_id', branchId).eq('member_id', profile.id).eq('status', 'rented'),
       supabase.from('children').select('*').eq('parent_id', profile.id),
     ]);
     setToys(t.data || []);
@@ -50,6 +52,7 @@ export default function Toys() {
       member_id: profile.id,
       child_id: selectedChild || null,
       due_date: dueDate || getDefaultDueDate(),
+      branch_id: branchId,
     };
     const { error } = await supabase.from('toy_rentals').insert(payload);
     if (!error) {

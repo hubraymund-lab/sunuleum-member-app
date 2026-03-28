@@ -1,26 +1,28 @@
 // Created: 2026-03-18
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Users, UserCheck, UserX, Wallet, BookOpen, Building2 } from 'lucide-react';
 
 export default function AdminDashboard() {
+  const { branchId } = useParams();
   const [stats, setStats] = useState({ total: 0, active: 0, inactive: 0, feeRate: 0, programs: 0, rentals: 0 });
   const [recentMembers, setRecentMembers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchStats(); }, []);
+  useEffect(() => { fetchStats(); }, [branchId]);
 
   async function fetchStats() {
     const currentMonth = new Date().toISOString().slice(0, 7);
     const [members, active, inactive, fees, paidFees, programs, pendingRentals, recent] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('status', 'inactive'),
-      supabase.from('fees').select('id', { count: 'exact', head: true }).eq('month', currentMonth),
-      supabase.from('fees').select('id', { count: 'exact', head: true }).eq('month', currentMonth).eq('status', 'paid'),
-      supabase.from('programs').select('id', { count: 'exact', head: true }).eq('status', 'open'),
-      supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(5),
+      supabase.from('branch_members').select('id', { count: 'exact', head: true }).eq('branch_id', branchId),
+      supabase.from('branch_members').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('status', 'active'),
+      supabase.from('branch_members').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('status', 'inactive'),
+      supabase.from('fees').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('month', currentMonth),
+      supabase.from('fees').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('month', currentMonth).eq('status', 'paid'),
+      supabase.from('programs').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('status', 'open'),
+      supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('status', 'pending'),
+      supabase.from('branch_members').select('*, profile:profiles(*)').eq('branch_id', branchId).order('created_at', { ascending: false }).limit(5),
     ]);
 
     const totalFees = fees.count || 0;
@@ -74,10 +76,10 @@ export default function AdminDashboard() {
             {recentMembers.map(m => (
               <li key={m.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
                 <div>
-                  <span className="font-medium text-gray-900">{m.name || '(이름 미입력)'}</span>
-                  <span className="text-sm text-gray-500 ml-2">{m.email}</span>
+                  <span className="font-medium text-gray-900">{m.profile?.name || '(이름 미입력)'}</span>
+                  <span className="text-sm text-gray-500 ml-2">{m.profile?.email}</span>
                 </div>
-                <span className="text-sm text-gray-400">{m.join_date}</span>
+                <span className="text-sm text-gray-400">{m.joined_at?.slice(0, 10)}</span>
               </li>
             ))}
           </ul>

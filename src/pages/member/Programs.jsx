@@ -1,5 +1,6 @@
 // Created: 2026-03-18
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -9,6 +10,7 @@ const STATUS_LABELS = { open: '모집중', closed: '마감', cancelled: '취소'
 const CATEGORY_COLORS = { '정기': 'bg-blue-100 text-blue-700', '특별': 'bg-purple-100 text-purple-700', '봉사': 'bg-green-100 text-green-700' };
 
 export default function Programs() {
+  const { branchId } = useParams();
   const { profile } = useAuth();
   const [programs, setPrograms] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
@@ -18,13 +20,13 @@ export default function Programs() {
   const [enrolling, setEnrolling] = useState(null);
   const [selectedChild, setSelectedChild] = useState('');
 
-  useEffect(() => { fetchData(); }, [profile]);
+  useEffect(() => { fetchData(); }, [profile, branchId]);
 
   async function fetchData() {
     if (!profile) return;
     const [p, e, c] = await Promise.all([
-      supabase.from('programs').select('*').order('start_date', { ascending: false }),
-      supabase.from('enrollments').select('*').eq('member_id', profile.id),
+      supabase.from('programs').select('*').eq('branch_id', branchId).order('start_date', { ascending: false }),
+      supabase.from('enrollments').select('*').eq('branch_id', branchId).eq('member_id', profile.id),
       supabase.from('children').select('*').eq('parent_id', profile.id),
     ]);
     setPrograms(p.data || []);
@@ -47,6 +49,7 @@ export default function Programs() {
       program_id: programId,
       member_id: profile.id,
       child_id: selectedChild || null,
+      branch_id: branchId,
     };
     const { error } = await supabase.from('enrollments').insert(payload);
     if (!error) {
@@ -59,6 +62,7 @@ export default function Programs() {
   async function handleCancel(programId) {
     await supabase.from('enrollments')
       .update({ status: 'cancelled' })
+      .eq('branch_id', branchId)
       .eq('program_id', programId)
       .eq('member_id', profile.id)
       .eq('status', 'enrolled');
