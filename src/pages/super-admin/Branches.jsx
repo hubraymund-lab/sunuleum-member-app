@@ -99,13 +99,34 @@ export default function SuperAdminBranches() {
 
   async function fetchBranchMembers(branchId) {
     setLoadingMembers(true);
-    const { data, error } = await supabase
+    // profiles 기반 조회 (branch_members 조인 문제 우회)
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, name, email, phone');
+
+    const { data: memberships } = await supabase
       .from('branch_members')
-      .select('*, profile:profiles(id, name, email, phone)')
+      .select('*')
       .eq('branch_id', branchId)
-      .eq('status', 'active')
-      .order('joined_at');
-    setBranchMembers(data || []);
+      .eq('status', 'active');
+
+    const memberMap = new Map((memberships || []).map(m => [m.user_id, m]));
+    const merged = (profiles || [])
+      .filter(p => memberMap.has(p.id))
+      .map(p => {
+        const bm = memberMap.get(p.id);
+        return {
+          id: bm.id,
+          branch_id: bm.branch_id,
+          user_id: p.id,
+          role: bm.role,
+          status: bm.status,
+          joined_at: bm.joined_at,
+          profile: p,
+        };
+      });
+
+    setBranchMembers(merged);
     setLoadingMembers(false);
   }
 

@@ -22,12 +22,17 @@ export default function AdminAttendance() {
   useEffect(() => { fetchData(); }, [year, branchId]);
 
   async function fetchData() {
-    const [r, m] = await Promise.all([
+    const [r, membershipsRes, profilesRes] = await Promise.all([
       supabase.from('attendance').select('*').eq('branch_id', branchId).gte('date', `${year}-01-01`).lte('date', `${year}-12-31`).order('date', { ascending: false }),
-      supabase.from('branch_members').select('profile_id, profile:profiles(id, name)').eq('branch_id', branchId).eq('status', 'active'),
+      supabase.from('branch_members').select('*').eq('branch_id', branchId).eq('status', 'active'),
+      supabase.from('profiles').select('id, name'),
     ]);
     setRecords(r.data || []);
-    setMembers((m.data || []).map(bm => ({ id: bm.profile?.id || bm.profile_id, name: bm.profile?.name })));
+    const profileMap = new Map((profilesRes.data || []).map(p => [p.id, p]));
+    const memberList = (membershipsRes.data || [])
+      .map(bm => ({ id: bm.user_id, name: profileMap.get(bm.user_id)?.name }))
+      .filter(m => m.name);
+    setMembers(memberList);
     setLoading(false);
   }
 

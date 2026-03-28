@@ -25,12 +25,35 @@ export default function AdminMembers() {
   useEffect(() => { fetchMembers(); }, [branchId]);
 
   async function fetchMembers() {
-    const { data } = await supabase
-      .from('branch_members')
-      .select('*, profile:profiles(*)')
-      .eq('branch_id', branchId)
+    // profiles 기반 조회 (branch_members 조인 문제 우회)
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('*')
       .order('created_at', { ascending: false });
-    setMembers(data || []);
+
+    const { data: memberships } = await supabase
+      .from('branch_members')
+      .select('*')
+      .eq('branch_id', branchId);
+
+    // branch_members에 있는 회원만 필터링하고 합치기
+    const memberMap = new Map((memberships || []).map(m => [m.user_id, m]));
+    const merged = (profiles || [])
+      .filter(p => memberMap.has(p.id))
+      .map(p => {
+        const bm = memberMap.get(p.id);
+        return {
+          id: bm.id,
+          branch_id: bm.branch_id,
+          role: bm.role,
+          status: bm.status,
+          joined_at: bm.joined_at,
+          user_id: p.id,
+          profile: p,
+        };
+      });
+
+    setMembers(merged);
     setLoading(false);
   }
 

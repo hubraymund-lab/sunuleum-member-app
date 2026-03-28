@@ -14,29 +14,41 @@ export default function AdminDashboard() {
 
   async function fetchStats() {
     const currentMonth = new Date().toISOString().slice(0, 7);
-    const [members, active, inactive, fees, paidFees, programs, pendingRentals, recent] = await Promise.all([
-      supabase.from('branch_members').select('id', { count: 'exact', head: true }).eq('branch_id', branchId),
-      supabase.from('branch_members').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('status', 'active'),
-      supabase.from('branch_members').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('status', 'inactive'),
+
+    // branch_members와 profiles를 분리 조회
+    const [membershipsRes, profilesRes, fees, paidFees, programs, pendingRentals] = await Promise.all([
+      supabase.from('branch_members').select('*').eq('branch_id', branchId),
+      supabase.from('profiles').select('*'),
       supabase.from('fees').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('month', currentMonth),
       supabase.from('fees').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('month', currentMonth).eq('status', 'paid'),
       supabase.from('programs').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('status', 'open'),
       supabase.from('rentals').select('id', { count: 'exact', head: true }).eq('branch_id', branchId).eq('status', 'pending'),
-      supabase.from('branch_members').select('*, profile:profiles(*)').eq('branch_id', branchId).order('created_at', { ascending: false }).limit(5),
     ]);
+
+    const memberships = membershipsRes.data || [];
+    const profileMap = new Map((profilesRes.data || []).map(p => [p.id, p]));
 
     const totalFees = fees.count || 0;
     const paidTotal = paidFees.count || 0;
 
     setStats({
-      total: members.count || 0,
-      active: active.count || 0,
-      inactive: inactive.count || 0,
+      total: memberships.length,
+      active: memberships.filter(m => m.status === 'active').length,
+      inactive: memberships.filter(m => m.status === 'inactive').length,
       feeRate: totalFees > 0 ? Math.round((paidTotal / totalFees) * 100) : 0,
       programs: programs.count || 0,
       rentals: pendingRentals.count || 0,
     });
-    setRecentMembers(recent.data || []);
+
+    // 최근 가입 회원 (joined_at 기준 최신 5명)
+    const recentList = memberships
+      .sort((a, b) => new Date(b.joined_at) - new Date(a.joined_at))
+      .slice(0, 5)
+      .map(m => ({
+        ...m,
+        profile: profileMap.get(m.user_id) || null,
+      }));
+    setRecentMembers(recentList);
     setLoading(false);
   }
 

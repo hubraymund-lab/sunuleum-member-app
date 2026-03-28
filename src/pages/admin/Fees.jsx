@@ -24,12 +24,17 @@ export default function AdminFees() {
   useEffect(() => { fetchData(); }, [branchId]);
 
   async function fetchData() {
-    const [f, m] = await Promise.all([
+    const [f, membershipsRes, profilesRes] = await Promise.all([
       supabase.from('fees').select('*').eq('branch_id', branchId).order('month', { ascending: false }),
-      supabase.from('branch_members').select('profile_id, profile:profiles(id, name)').eq('branch_id', branchId).eq('status', 'active'),
+      supabase.from('branch_members').select('*').eq('branch_id', branchId).eq('status', 'active'),
+      supabase.from('profiles').select('id, name'),
     ]);
     setFees(f.data || []);
-    setMembers((m.data || []).map(bm => ({ id: bm.profile?.id || bm.profile_id, name: bm.profile?.name })));
+    const profileMap = new Map((profilesRes.data || []).map(p => [p.id, p]));
+    const memberList = (membershipsRes.data || [])
+      .map(bm => ({ id: bm.user_id, name: profileMap.get(bm.user_id)?.name }))
+      .filter(m => m.name);
+    setMembers(memberList);
     setLoading(false);
   }
 
