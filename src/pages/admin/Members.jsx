@@ -24,8 +24,6 @@ export default function AdminMembers() {
 
   useEffect(() => { fetchMembers(); }, [branchId]);
 
-  const [debug, setDebug] = useState('');
-
   async function fetchMembers() {
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
@@ -52,15 +50,6 @@ export default function AdminMembers() {
           profile: p,
         };
       });
-
-    // 디버그 정보
-    setDebug(
-      `branchId: ${branchId}\n` +
-      `profiles: ${profiles?.length || 0}건 | memberships: ${memberships?.length || 0}건\n` +
-      `merged: ${merged.length}건\n` +
-      `merged 상세: ${JSON.stringify(merged.map(m => ({ name: m.profile?.name, status: m.status, role: m.role })))}\n` +
-      `statusFilter: "${statusFilter}"`
-    );
 
     setMembers(merged);
     setLoading(false);
@@ -137,11 +126,6 @@ export default function AdminMembers() {
           </button>
         </div>
       </div>
-
-      {/* 디버그 정보 (문제 해결 후 제거) */}
-      {debug && (
-        <pre className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 mb-4 text-xs text-gray-700 whitespace-pre-wrap">{debug}</pre>
-      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <table className="w-full">
