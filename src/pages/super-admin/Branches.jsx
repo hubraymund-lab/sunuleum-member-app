@@ -1,5 +1,5 @@
 // Created: 2026-03-28
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { supabase } from '../../lib/supabase';
 import Modal from '../../components/common/Modal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
@@ -99,12 +99,13 @@ export default function SuperAdminBranches() {
 
   async function fetchBranchMembers(branchId) {
     setLoadingMembers(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('branch_members')
       .select('*, profile:profiles(id, name, email, phone)')
       .eq('branch_id', branchId)
       .eq('status', 'active')
-      .order('created_at');
+      .order('joined_at');
+    if (error) console.error('fetchBranchMembers error:', error);
     setBranchMembers(data || []);
     setLoadingMembers(false);
   }
@@ -187,8 +188,8 @@ export default function SuperAdminBranches() {
             ) : branches.length === 0 ? (
               <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-400">호점이 없습니다</td></tr>
             ) : branches.map(b => (
-              <>
-                <tr key={b.id} className="hover:bg-gray-50">
+              <Fragment key={b.id}>
+                <tr className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <button onClick={() => toggleBranchDetail(b.id)} className="flex items-center gap-2 font-medium text-gray-900 hover:text-indigo-600">
                       {expandedBranch === b.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -213,7 +214,7 @@ export default function SuperAdminBranches() {
                   </td>
                 </tr>
                 {expandedBranch === b.id && (
-                  <tr key={`${b.id}-detail`}>
+                  <tr>
                     <td colSpan={5} className="px-6 py-4 bg-gray-50">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="text-sm font-semibold text-gray-700">회원 목록</h4>
@@ -259,7 +260,7 @@ export default function SuperAdminBranches() {
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>
